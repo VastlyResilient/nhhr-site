@@ -35,6 +35,13 @@ a{color:inherit}
 .nav{display:flex;gap:26px;margin-left:auto;list-style:none}
 .nav a{text-decoration:none;font-weight:600;font-size:15px;padding:12px 2px;min-height:44px;display:inline-flex;align-items:center}
 .nav a:hover{color:var(--green)}
+.nav-login{margin-left:auto;font-weight:700;font-size:14px;text-decoration:none;color:var(--green);min-height:44px;display:inline-flex;align-items:center}
+.hero-links{margin-top:18px;font-size:15px;color:var(--neutral)}
+.hero-links a{color:var(--green);font-weight:700}
+.socials{display:flex;gap:18px;flex-wrap:wrap;margin-bottom:14px}
+.socials a{color:#fff;text-decoration:none;font-size:14px;font-weight:600;min-height:44px;display:inline-flex;align-items:center}
+.socials a:hover{color:var(--accent)}
+.addr a{color:inherit;text-decoration:underline}
 .btn{display:inline-flex;align-items:center;justify-content:center;min-height:48px;padding:0 26px;border-radius:999px;font-family:var(--font-display);font-weight:700;font-size:15px;text-decoration:none;border:2px solid transparent;transition:transform .15s ease,background .15s ease,color .15s ease}
 .btn-primary{background:linear-gradient(var(--green),var(--green));color:#fff}
 .btn-primary:hover{background:var(--green-2);transform:translateY(-1px)}
@@ -148,7 +155,7 @@ a{color:inherit}
   .train,.visit-in{grid-template-columns:1fr;gap:32px}
   .strip-in{grid-template-columns:repeat(2,1fr)}
   .sticky-call{display:block}
-  .btn-call{margin-left:auto}
+  
   .hero-in{padding:64px 24px 88px}
   .h1{max-width:none}
 }
