@@ -1,0 +1,16 @@
+/* DESIGN TOKENS . bright performance (Jev-selected), MotionSites logic */
+:root{
+  --surface:#F7F7F2;         /* warm paper white */
+  --ink:#14211C;             /* near-black green ink */
+  --green:#0E4630;           /* deep court green (dominant) */
+  --green-2:#17653F;
+  --neutral:#5C665F;         /* muted text */
+  --line:#DEDFD8;
+  --accent:#E4FF3C;          /* optic yellow . ONCE per viewport */
+  --radius:12px;
+  --radius-sm:8px;
+  --font-display:"Sora",ui-sans-serif,system-ui,sans-serif;
+  --font-body:"Manrope",ui-sans-serif,system-ui,sans-serif;
+  --u:8px;                   /* 8pt spacing scale */
+  --maxw:1160px;
+}
