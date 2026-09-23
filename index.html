@@ -40,9 +40,10 @@
 <main id="main">
 
   <!-- HERO: living background = generated light-ribbon loop (M1: one hero object; text static) -->
-  <section class="hero">
+  <section class="hero" id="heroStage">
+   <div class="hero-sticky">
     <div class="hero-bg" aria-hidden="true">
-      <video class="hero-vid" autoplay muted loop playsinline poster="img/hero_v3_poster.jpg">
+      <video class="hero-vid" muted loop playsinline preload="auto" poster="img/hero_v3_poster.jpg">
         <source src="img/hero_v3.mp4" type="video/mp4">
       </video>
       <div class="hero-scrim"></div>
@@ -56,6 +57,7 @@
         <a class="btn btn-ghost" href="tel:+120****5665">Call (203) 239-5665</a>
       </div>
     </div>
+   </div>
   </section>
 
   <!-- FOUR ACTION PATHS: the old site's real funnel, kept and wired to live systems -->

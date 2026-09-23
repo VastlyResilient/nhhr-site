@@ -36,13 +36,17 @@
 
   // scroll-scrub needs a SEEKABLE source: a paused streaming video never buffers
   // (seekable.end(0) === 0, currentTime snaps back). Blob it.
-  if (!motionOff && scrubVideo) {
-    var srcEl = scrubVideo.querySelector("source");
-    var srcUrl = srcEl ? srcEl.src : scrubVideo.currentSrc;
-    fetch(srcUrl).then(function(r){ return r.blob(); }).then(function(bv){
-      scrubVideo.src = URL.createObjectURL(bv);
-      scrubVideo.load();
-    }).catch(function(){});
+  if (!motionOff) {
+    [document.querySelector(".hero-vid"), scrubVideo].forEach(function(v){
+      if (!v) return;
+      var srcEl = v.querySelector("source");
+      var srcUrl = srcEl ? srcEl.src : v.currentSrc;
+      fetch(srcUrl).then(function(r){ return r.blob(); }).then(function(bv){
+        v.src = URL.createObjectURL(bv);
+        v.load();
+        var p = v.play(); if (p && p.catch) p.catch(function(){});
+      }).catch(function(){});
+    });
   }
 
   // motion toggle (WCAG 2.2.2) and the single off-switch
@@ -128,26 +132,53 @@
     });
   }, {threshold: 0.4}).observe(strip);
 
-  var bg = document.querySelector(".hero-bg");
+  // ===== SCROLL-VIDEO ENGINE (M4: exact math) =====
+  // p     = clamp(-rect.top / (stageH - vh), 0, 1)   scroll progress through a pinned stage
+  // hero  target = p*0.85*(dur-0.05) + drift        drift = (now*0.00006) mod dur  (breathes at rest)
+  // band  target = p*1.00*(dur-0.05)                pure scrub
+  // lerp  currentTime += (target - currentTime) * 0.10 per frame  (30fps throttle)
+  // copy  opacity  = 1 - clamp((p - 0.75) / 0.25, 0, 1)           (release into next section)
+  var heroStage = document.getElementById("heroStage");
+  var heroVideo = document.querySelector(".hero-vid");
+  var heroIn = document.querySelector(".hero-in");
   var band = document.querySelector(".scrollband");
-  var ticking = false;
-  function onScroll(){
-    if (ticking) return;
-    ticking = true;
-    requestAnimationFrame(function(){
-      if (bg && !reduce) {
-        var y = Math.min(window.scrollY, 600);
-        bg.style.transform = "translateY(" + (y * 0.18) + "px)";
-      }
-      if (band && scrubVideo && scrubVideo.duration) {
-        var r = band.getBoundingClientRect();
-        var total = r.height - window.innerHeight;
-        var p = Math.min(Math.max(-r.top / total, 0), 1);
-        scrubVideo.currentTime = p * (scrubVideo.duration - 0.05);
-      }
-      ticking = false;
-    });
+  var SPAN_HERO = 0.85, SPAN_BAND = 1.0, LERP = 0.10, FADE_FROM = 0.75;
+
+  function progress(stage){
+    var r = stage.getBoundingClientRect();
+    var total = r.height - window.innerHeight;
+    return total <= 0 ? 0 : Math.min(Math.max(-r.top / total, 0), 1);
   }
-  window.addEventListener("scroll", onScroll, {passive: true});
-  onScroll();
+  function wrap(t, dur){ return ((t % dur) + dur) % dur; }
+
+  var lastFrame = 0;
+  function engine(now){
+    requestAnimationFrame(engine);
+    if (motionOff || now - lastFrame < 33) return;   // ~30fps
+    lastFrame = now;
+    var drift = (now * 0.00006);                      // 0.06 s of video per real second
+    if (heroStage && heroVideo && heroVideo.duration) {
+      var dur = heroVideo.duration;
+      var p = progress(heroStage);
+      var target = wrap(p * SPAN_HERO * (dur - 0.05) + drift, dur);
+      heroVideo.currentTime += (target - heroVideo.currentTime) * LERP;
+      if (heroIn) heroIn.style.opacity = 1 - Math.min(Math.max((p - FADE_FROM) / (1 - FADE_FROM), 0), 1);
+    }
+    if (band && scrubVideo && scrubVideo.duration) {
+      var d2 = scrubVideo.duration;
+      var p2 = progress(band);
+      scrubVideo.currentTime += (p2 * SPAN_BAND * (d2 - 0.05) - scrubVideo.currentTime) * LERP;
+    }
+  }
+  if (!motionOff && !reduce) requestAnimationFrame(engine);
+  else if (!motionOff && reduce) requestAnimationFrame(engine);   // scrub is user-driven: keep it
+
+  window.addEventListener("scroll", function(){
+    if (motionOff) return;
+    if (heroIn && heroStage && heroVideo && !heroVideo.duration) {
+      // engine handles fade once running; cheap fallback for first paint
+      var p = progress(heroStage);
+      heroIn.style.opacity = 1 - Math.min(Math.max((p - FADE_FROM) / (1 - FADE_FROM), 0), 1);
+    }
+  }, {passive: true});
 })();
